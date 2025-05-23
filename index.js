@@ -27,22 +27,47 @@ async function run() {
 
         // send data to db/ Post 
         app.post('/recipies', async (req, res) => {
-            const newRecipe = req.body;
-            const result = await recipeCollection.insertOne(newRecipe);
-            res.send(result);
-        })
+            try {
+                const newRecipe = {
+                    ...req.body,
+                    likeCount: 0  // eta manually set koro
+                };
+                const result = await recipeCollection.insertOne(newRecipe);
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: 'Failed to add recipe' });
+            }
+        });
+
+
         // To get all the recipies
         app.get('/recipies', async (req, res) => {
             const result = await recipeCollection.find().toArray();
             res.send(result);
         });
-        // get specific data
+        // Get single recipe
         app.get('/recipies/:id', async (req, res) => {
+            const id = new ObjectId(req.params.id);
+            const recipe = await recipeCollection.findOne({ _id: id });
+            res.send(recipe);
+        });
+        // For updating likeCount by +1
+         app.put('/recipies/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await recipeCollection.findOne(query);
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updatedCoffee = req.body;
+            const updatedDoc = {
+                $set: { likeCount: 1 }
+            }
+            const result = await recipeCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
+
         })
+
+
+
+
         // Update any data from previous data
         app.put('/recipies/:id', async (req, res) => {
             const id = req.params.id;
@@ -63,8 +88,10 @@ async function run() {
             const result = await recipeCollection.deleteOne(query);
             res.send(result);
         })
-        
-        
+        // for like count 
+
+
+
 
 
 

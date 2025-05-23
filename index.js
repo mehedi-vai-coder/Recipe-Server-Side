@@ -52,7 +52,7 @@ async function run() {
             res.send(recipe);
         });
         // For updating likeCount by +1
-         app.put('/recipies/:id', async (req, res) => {
+        app.put('/recipies/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const options = { upsert: true };
@@ -64,6 +64,22 @@ async function run() {
             res.send(result);
 
         })
+        // for getting data by filter
+        app.get("/recipies", async (req, res) => {
+            const { cuisine } = req.query;
+            try {
+                let query = {};
+                if (cuisine && cuisine !== "All") {
+                    query.cuisineType = cuisine;
+                }
+
+                const recipes = await recipeCollection.find(query);
+                res.json(recipes);
+            } catch (err) {
+                res.status(500).json({ message: "Server Error", error: err });
+            }
+        });
+
 
 
 

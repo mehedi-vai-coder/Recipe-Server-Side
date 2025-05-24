@@ -45,7 +45,7 @@ async function run() {
             const result = await recipeCollection.find().toArray();
             res.send(result);
         });
-        
+
         // to get top-recipies
         app.get('/top-recipies', async (req, res) => {
             try {
@@ -60,7 +60,6 @@ async function run() {
             }
         });
 
-
         // Get single recipe
         app.get('/recipies/:id', async (req, res) => {
             const id = new ObjectId(req.params.id);
@@ -68,19 +67,27 @@ async function run() {
             res.send(recipe);
         });
 
-        // For updating likeCount by +1
-        app.put('/recipies/:id', async (req, res) => {
+        // PATCH like count by +1
+        app.patch("/recipies/:id/like", async (req, res) => {
             const id = req.params.id;
-            const filter = { _id: new ObjectId(id) };
-            const options = { upsert: true };
-            const updatedCoffee = req.body;
-            const updatedDoc = {
-                $set: { likeCount: 1 }
-            }
-            const result = await recipeCollection.updateOne(filter, updatedDoc, options);
-            res.send(result);
 
-        })
+            try {
+                const result = await recipeCollection.findOneAndUpdate(
+                    { _id: new ObjectId(id) },
+                    { $inc: { likeCount: 1 } },
+                    { returnDocument: "after" }
+                );
+
+                if (!result.value) {
+                    return res.status(404).send({ message: "Recipe not found" });
+                }
+
+                res.send(result.value); 
+            } catch (error) {
+                res.status(500).send({ message: "Failed to like recipe", error });
+            }
+        });
+
         // for getting data by filter
         app.get("/recipies", async (req, res) => {
             const { cuisine } = req.query;

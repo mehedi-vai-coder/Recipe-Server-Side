@@ -26,7 +26,7 @@ async function run() {
         const recipeCollection = client.db('RecipeDB').collection('recipe')
 
         // send data to db/ Post 
-        app.post('/recipies', async (req, res) => {
+        app.post('/recipes', async (req, res) => {
             try {
                 const newRecipe = {
                     ...req.body,
@@ -40,14 +40,14 @@ async function run() {
         });
 
 
-        // To get all the recipies
-        app.get('/recipies', async (req, res) => {
+        // To get all the recipes
+        app.get('/recipes', async (req, res) => {
             const result = await recipeCollection.find().toArray();
             res.send(result);
         });
 
-        // to get top-recipies
-        app.get('/top-recipies', async (req, res) => {
+        // to get top-recipes
+        app.get('/top-recipes', async (req, res) => {
             try {
                 const top = await recipeCollection
                     .find({})
@@ -61,14 +61,14 @@ async function run() {
         });
 
         // Get single recipe
-        app.get('/recipies/:id', async (req, res) => {
+        app.get('/recipes/:id', async (req, res) => {
             const id = new ObjectId(req.params.id);
             const recipe = await recipeCollection.findOne({ _id: id });
             res.send(recipe);
         });
 
         // Patch like count by 
-        app.patch("/recipies/:id/like", async (req, res) => {
+        app.patch("/recipes/:id/like", async (req, res) => {
             const id = req.params.id;
             try {
                 const result = await recipeCollection.findOneAndUpdate(
@@ -89,7 +89,7 @@ async function run() {
 
 
         // for getting data by filter
-        app.get("/recipies", async (req, res) => {
+        app.get("/recipes", async (req, res) => {
             const { cuisine } = req.query;
             try {
                 let query = {};
@@ -105,7 +105,7 @@ async function run() {
         });
 
         // Update any data from previous data
-        app.put('/recipies/:id', async (req, res) => {
+        app.put('/recipes/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const options = { upsert: true };
@@ -118,7 +118,7 @@ async function run() {
 
         })
         // Delete the data from database
-        app.delete('/recipies/:id', async (req, res) => {
+        app.delete('/recipes/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await recipeCollection.deleteOne(query);

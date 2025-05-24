@@ -45,12 +45,29 @@ async function run() {
             const result = await recipeCollection.find().toArray();
             res.send(result);
         });
+        
+        // to get top-recipies
+        app.get('/top-recipies', async (req, res) => {
+            try {
+                const top = await recipeCollection
+                    .find({})
+                    .sort({ likeCount: -1 })
+                    .limit(6)
+                    .toArray();
+                res.send(top);
+            } catch (err) {
+                res.status(500).send({ message: "Failed to load top recipes" });
+            }
+        });
+
+
         // Get single recipe
         app.get('/recipies/:id', async (req, res) => {
             const id = new ObjectId(req.params.id);
             const recipe = await recipeCollection.findOne({ _id: id });
             res.send(recipe);
         });
+
         // For updating likeCount by +1
         app.put('/recipies/:id', async (req, res) => {
             const id = req.params.id;
@@ -80,10 +97,6 @@ async function run() {
             }
         });
 
-
-
-
-
         // Update any data from previous data
         app.put('/recipies/:id', async (req, res) => {
             const id = req.params.id;
@@ -104,13 +117,6 @@ async function run() {
             const result = await recipeCollection.deleteOne(query);
             res.send(result);
         })
-        // for like count 
-
-
-
-
-
-
 
         // To confirm Connection
         await client.db("admin").command({ ping: 1 });
